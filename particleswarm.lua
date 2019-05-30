@@ -21,8 +21,8 @@ end
 function getExpo(str) 
 	--if str isnt nil and has a number preceded by a '^''
 	if str ~= nil and str:match("%^%d+") then
-		str = str:match("%^%d+")
-		str = str:match("%d+")
+		str = str:match("%^%d+") --gets substring which is '^ + number'
+		str = str:match("%d+")  -- gets just the number from '^ + number'
 		return tonumber(str)
 	else
 		return 1;
@@ -33,16 +33,13 @@ end
 function getNum(str)
 	--if str isnt nil and it has a number not preceded by a '^'' in it
 	if str ~= nil and (str:match("[^%^]+%d+") or str:match("^%d+")) then
-		--extract sub string which has number in it
-		str = str:match("[%-%+%s%.]*%d+")
+		str = str:match("[%-%+%s%.]*%d+") --extract sub string which has number in it
 		local neg = getNeg(str)
-		--get just the number from str
-		str = str:match("%.*%d+")
+		str = str:match("%.*%d+") --get just the number from str
 		return tonumber(str * neg)
 	--if str isnt nil and has a character in it not preceded by a '^'
 	elseif str ~= nil and str:match("[^%^]+%a") then
-		--extract substring which doesnt have a '^' in it
-		str = str:match("[^%^]*%a+")
+		str = str:match("[^%^]*%a+")  --extract substring which doesnt have a '^' in it
 		local neg = tonumber(getNeg(str))
 		return 1 * neg
 	else
@@ -71,46 +68,43 @@ function getX(str)
 end
 
 --multiply x value by its exponent and its coefficient 
-function multiplyByExpo(equation,x,index)
-	if equation.x[index] == 1 then
-		local sum  = math.pow(x,equation.expo[index])
-		if equation.nums[index] ~= 0 then
-			sum = sum * equation.nums[index]
+function multiplyByExpo(x,index)
+	if EQ.x[index] == 1 then
+		local sum  = math.pow(x,EQ.expo[index])
+		if EQ.nums[index] ~= 0 then
+			sum = sum * EQ.nums[index]
 		end
 		return sum
 	else
-		return math.pow(equation.nums[index],equation.expo[index])
+		return math.pow(EQ.nums[index],EQ.expo[index])
 	end
 end
 
---sum all values in the equation then return sum
+--sum all values in the equation using particle's current x value then return sum
 function sumFx(x)
 	local sum = 0
 	for index,value in pairs(EQ.parts) do
-		sum = sum + multiplyByExpo(EQ,x,index)
+		sum = sum + multiplyByExpo(x,index)
 	end
 	return sum
 end
 
 --make table to hold equation 
 function makeTable()
-	local table = {}
-	--hold the whole equation, each item a seperate element in "parts"
-	table["parts"] = {}
-	--holds 1 if item has x, 0 if it doesnt
-	table["x"] = {}
-	--holds value of exponenet, or 1 if no exponenet
-	table["expo"] = {}
-	--holds value of coefficients
-	table["nums"] = {}
+	local table = {} 
+	table["parts"] = {} --hold the whole equation, each item a seperate element in "parts"
+	table["x"] = {} --holds 1 if item has x, 0 if it doesnt
+	table["expo"] = {}  --holds value of exponenet, or 1 if no exponenet given
+	table["nums"] = {} --holds value of coefficients
 	return table
 end
 
 --checks if user entered equation in correct format
 function checkFormat(equation)
-	local previous = "10x^100000"
-	local space_count = 0
-	--if neither a '-'' or '+'' sign appears in equation, return false
+	local previous = "10x^100000"  --holds exponent value of previous element in equation. ridiculously large value to sart with as a precaution.
+	local space_count = 0  --holds number of items. 
+
+	--if neither a '-'' nor '+'' sign appears in equation, return false
 	if equation:match("[%-%+]+") == nil then
 		io.write("\nerror, no items appear which have a '-' or '+' in them \n")
 		return false
@@ -128,7 +122,7 @@ function checkFormat(equation)
 
 	--iterates through each item in equation
 	for c in equation:gmatch("[^%-%+]+") do
-		--counts items in an equation by counting spaces
+		--counts items in an equation by counting spaces between items
 		if c:match("%s+") then
 			space_count = space_count + 1
 		end
@@ -139,12 +133,8 @@ function checkFormat(equation)
 		end
 		--if variable name is more than one character, return false
 		if c:match("%a%a+") then
-			if c:match("sin") or c:match("cos") then
-				--do nothing
-			else
-				io.write("\nerror,please keep variable names ot single character\n")
-				return false
-			end
+			io.write("\nerror,please keep variable names ot single character\n")
+			return false
 		end
 		previous = c
 	end
@@ -152,9 +142,8 @@ function checkFormat(equation)
 	if space_count < 1 then 
 		io.write("\nerror, too few spaces or possibly too few items in equation.\n")
 		return false
-	else
-		return true
 	end
+	return true
 end
 
 --asks user if they want to try another guess. if so, then takes new guess and sovles again
@@ -169,8 +158,9 @@ function tryNewGuess()
 	end
 end
 
+--gets equation from user
 function getEquation()
-	io.write("please input equation you wish to find roots of using the Newton-Raphson Method\n")
+	io.write("please input equation you wish to find roots of using particle swarm optimization.\n")
 	io.write("equation must be in format 'ax^n + bx^n-1 .... + k'\n")
 	local equation = io.read()
 	if checkFormat(equation) == false then
@@ -182,6 +172,7 @@ function getEquation()
 
 end
 
+--gets initial guess for x value from user
 function getGuess()
 	io.write("please enter your intial guess\n")
 	local guess = tonumber(io.read())
@@ -193,6 +184,7 @@ function getGuess()
 	end
 end
 
+--gets minimum possible value to check for x from user
 function getMin()
 	io.write("please enter min value\n")
 	local min = tonumber(io.read())
@@ -204,6 +196,7 @@ function getMin()
 	end
 end
 
+--gets maximum possible value to check for x from user
 function getMax()
 	io.write("please enter max value\n")
 	local max = tonumber(io.read())
@@ -215,6 +208,7 @@ function getMax()
 	end
 end
 
+--gets number of particles from user
 function getSwarmSize()
 	io.write("please enter number of particles\n")
 	local particles = tonumber(io.read())
@@ -226,38 +220,47 @@ function getSwarmSize()
 	end
 end
 
+--gets values for min, max, and swarm size.
 function initValues()
 	getMin()
 	getMax()
 	getSwarmSize()
 end
 
+--checks particles current local best against the swarms global best
 function checkGlobalBest(i)
+	--if a particle's best result is closer to zero than globalbest, set globalbest to that particle's result. 
+	--also set value of globalbestx to particle's curent x value
 	if math.abs(SWARM[i].best_result) < math.abs(GLOBALBESTRESULT) then
 		GLOBALBESTX = SWARM[i].best_x
 		GLOBALBESTRESULT = SWARM[i].best_result
 	end
 end
 
+--checks a particles current value against its all time best 
 function checkLocalBest(i)
+	--if the current result is close to zero than particle's all time best result, then set best result to current result
+	--also set value of particles best x value to current x value
 	if math.abs(SWARM[i].current_result) < math.abs(SWARM[i].best_result) then
 		SWARM[i].best_x = SWARM[i].current_x
 		SWARM[i].best_result = SWARM[i].current_result 
 	end
 end
 
+--create individual particle
 function makeParticle()
-	local x = math.random(MIN,MAX)
-	local val = sumFx(x)
+	local x = math.random(MIN,MAX)  --get random value within range of possible x values.
+	local val = sumFx(x) --call sumFun with random x value to get initial starting value for particle
 	particle = {}
-	particle.best_x = x 
-	particle.current_x = x 
-	particle.velocity = math.random(0,2) * .5 + .01
-	particle.best_result = val 
-	particle.current_result = val
+	particle.best_x = x  --initialize particle's starting best x value with the random x value from above
+	particle.current_x = x --initialize particle's starting x value with the random x value from above
+	particle.velocity = math.random(0,2) * .5 + .01  --set initial velocity of particle
+	particle.best_result = val --initialize particle's best result with val
+	particle.current_result = val --set oarticle's current result to val
 	return particle
 end
 
+--create the particle swarm
 function makeSwarm()
 	for i = 0,SWARM_SIZE,1 do
 		SWARM[i] = makeParticle()
@@ -265,10 +268,12 @@ function makeSwarm()
 	end
 end
 
+--gets new velocity for individual particle. 
 function getNewV(i)
 	SWARM[i].velocity = (INERTIAL_W * SWARM[i].velocity ) + (C_1 * math.random(0,20) *.05 * (SWARM[i].best_x - SWARM[i].current_x)) + (C_2 * math.random(0,20) * .05 * (GLOBALBESTX - SWARM[i].current_x))
 end
 
+--get new x value for individual particle.
 function getNewX(i)
 	local x = SWARM[i].current_x + SWARM[i].velocity 
 	if x < MIN then
@@ -280,10 +285,11 @@ function getNewX(i)
 	end
 end
 
+--solves eqution user entered
 function solve()
-	GLOBALBESTX = getGuess()
-	GLOBALBESTRESULT = sumFx(GLOBALBESTX)
-	local loop_count = 0
+	GLOBALBESTX = getGuess()  --gets users initial guess for x value
+	GLOBALBESTRESULT = sumFx(GLOBALBESTX)  --initialize globalbestresult
+	local loop_count = 0  --counts how many iterations loop goes through to get to solution
 	while(math.abs(GLOBALBESTRESULT) > .000001 and loop_count < 10000) do
 		for i,v in pairs(SWARM) do
 			getNewV(i)
@@ -309,7 +315,7 @@ function startSolving()
 	solve()
 end
 
-EQ = {} --table for equation
+EQ = {}  --table for equation
 INERTIAL_W = .8		--inertial coefficient
 C_1 = 1.7	--cognitive coefficient
 C_2 = 1.7	--social coefficient
