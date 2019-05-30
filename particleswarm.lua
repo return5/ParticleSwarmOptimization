@@ -8,12 +8,9 @@ end
 function iterateEquation()
 	--iterate through equation_parts
 	for index,value in pairs(EQ.parts) do
-		--extracts coefficients and places them in EQ.num
-		table.insert(EQ.nums,index,getNum(value))
-		--extracts exponenets and places them in order in EQ.expo
-		table.insert(EQ.expo,index,getExpo(value))
-		--extracts each x term and places it in EQ.x 
-		table.insert(EQ.x,index,getX(value))
+		table.insert(EQ.nums,index,getNum(value)) --extracts coefficients and places them in EQ.num
+		table.insert(EQ.expo,index,getExpo(value)) --extracts exponenets and places them in order in EQ.expo
+		table.insert(EQ.x,index,getX(value)) --extracts each x term and places it in EQ.x 
 	end
 end
 
